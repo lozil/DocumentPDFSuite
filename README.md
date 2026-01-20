@@ -1,5 +1,7 @@
 # Smart Text Replacer Suite
 
+[LINK](https://lozil.github.io/DocumentPDFSuite/)
+
 A web suite featuring two powerful tools:
 - **Smart Text Replacer**: Personalize any text template using smart placeholders and export to PDF.
 - **Rich Text to PDF**: Write or paste rich text, preview, and export as PDF with page fill and font size options.

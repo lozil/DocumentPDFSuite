@@ -3,15 +3,18 @@
  * Main JavaScript functionality
  */
 
-// Initialize jsPDF
-const { jsPDF } = window.jspdf;
+// Initialize jsPDF (browser-only; keeps Node tests from crashing on import)
+let jsPDF;
+if (typeof window !== 'undefined' && window.jspdf && window.jspdf.jsPDF) {
+    ({ jsPDF } = window.jspdf);
+}
 
-// DOM Elements
-const inputText = document.getElementById('inputText');
-const replacementFields = document.getElementById('replacementFields');
-const outputText = document.getElementById('outputText');
-const replacementsSection = document.getElementById('replacementsSection');
-const downloadBtn = document.getElementById('downloadBtn');
+// DOM Elements (browser-only; keeps Node tests from crashing on import)
+let inputText;
+let replacementFields;
+let outputText;
+let replacementsSection;
+let downloadBtn;
 
 // Application State
 let placeholders = [];
@@ -314,6 +317,14 @@ function handleInputChange() {
  * Initialize the application
  */
 function init() {
+    // Cache DOM references once at app start.
+    // eslint-disable-next-line no-undef
+    inputText = document.getElementById('inputText');
+    replacementFields = document.getElementById('replacementFields');
+    outputText = document.getElementById('outputText');
+    replacementsSection = document.getElementById('replacementsSection');
+    downloadBtn = document.getElementById('downloadBtn');
+
     // Add event listeners
     inputText.addEventListener('input', handleInputChange);
 
@@ -349,9 +360,16 @@ function init() {
     });
 }
 
-// Initialize when DOM is loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
+// Initialize when DOM is loaded (browser only)
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+}
+
+// Export pure helpers for Node-based tests.
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { extractPlaceholders, linkify };
 }

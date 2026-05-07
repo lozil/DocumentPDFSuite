@@ -1,8 +1,12 @@
 // Rich Text to PDF Tool
 let quill;
 let fontSize = 12;
+let jsPDF;
 
-const { jsPDF } = window.jspdf;
+// Initialize jsPDF (browser-only; keeps Node tests from crashing on import)
+if (typeof window !== 'undefined' && window.jspdf && window.jspdf.jsPDF) {
+    ({ jsPDF } = window.jspdf);
+}
 
 function estimatePageFill(text, fontSize) {
     // Rough estimate: characters per page for A4 at given font size
@@ -52,16 +56,24 @@ function downloadPdf() {
     doc.save(`RichTextPDF-${timestamp}.pdf`);
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    quill = new Quill('#editor-container', {
-        theme: 'snow',
-        placeholder: 'Write or paste your rich text here...'
-    });
-    quill.on('text-change', updatePreviewAndFill);
-    document.getElementById('fontSize').addEventListener('change', function(e) {
-        fontSize = parseInt(e.target.value, 10);
+// Initialize the app (browser only)
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', function() {
+        quill = new Quill('#editor-container', {
+            theme: 'snow',
+            placeholder: 'Write or paste your rich text here...'
+        });
+        quill.on('text-change', updatePreviewAndFill);
+        document.getElementById('fontSize').addEventListener('change', function(e) {
+            fontSize = parseInt(e.target.value, 10);
+            updatePreviewAndFill();
+        });
+        document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
         updatePreviewAndFill();
     });
-    document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
-    updatePreviewAndFill();
-}); 
+}
+
+// Export pure helpers for Node-based tests.
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { estimatePageFill };
+}
